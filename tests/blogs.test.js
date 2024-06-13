@@ -19,7 +19,7 @@ beforeEach(async () => {
 })
 
 
-test.only('blogs are returned as json', async () => {
+test('blogs are returned as json', async () => {
     await api
       .get('/api/blogs')
       .expect(200)
@@ -27,21 +27,21 @@ test.only('blogs are returned as json', async () => {
 })
 
 
-test.only('all blogs are returned', async () => {
+test('all blogs are returned', async () => {
     const response = await api.get('/api/blogs')
   
     assert.strictEqual(response.body.length, helper.initialBlogs.length)
 })
 
 
-test.only('field id is named id', async () => {
+test('field id is named id', async () => {
     const response = await api.get('/api/blogs')
 
     assert.equal(Object.keys(response.body[0]).includes('id'), true)
 })
 
 
-test.only('a valid blog can be added', async () => {
+test('a valid blog can be added', async () => {
     const newBlog = {
         title: 'async and await are awesome',
         author: 'mixxo',
@@ -63,7 +63,7 @@ test.only('a valid blog can be added', async () => {
 })
 
 
-test.only('detect missing title or url', async () =>{
+test('detect missing title or url', async () =>{
     const newBlog = {
         title: '',
         author: 'mixxo',
@@ -76,6 +76,41 @@ test.only('detect missing title or url', async () =>{
     .send(newBlog)
     .expect(400)
 
+})
+
+
+test('succeeds with status code 204 if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1)
+
+    const contents = blogsAtEnd.map(r => r.title)
+    assert(!contents.includes(blogToDelete.title))
+})
+
+
+test.only('a valid blog can be updated', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+    blogToUpdate.likes = 20
+
+    await api
+    .put(`/api/blogs/${blogToUpdate.id}`)
+    .send(blogToUpdate)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+
+    assert.deepStrictEqual(blogToUpdate, blogsAtEnd[0])
 })
 
 
