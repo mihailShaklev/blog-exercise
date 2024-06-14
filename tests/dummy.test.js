@@ -264,7 +264,7 @@ describe('total likes', () => {
       
       test('find most likes', () => {
           const result = listHelper.mostLikes(listWithBlogs)
-          assert.deepStrictEqual(result, wrongBlog)
+          assert.deepStrictEqual(result, actualBlog)
       })
 
   })
